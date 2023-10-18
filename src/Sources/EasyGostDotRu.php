@@ -2,9 +2,6 @@
 
 namespace App\Sources;
 
-use App\HttpRequest;
-use DOMDocument;
-use DOMXPath;
 use Symfony\Component\DomCrawler\Crawler;
 
 class EasyGostDotRu extends Source
@@ -40,7 +37,6 @@ class EasyGostDotRu extends Source
             $this->setOutputData(['error' => ['code' => $curl->errorCode, 'messages' => $curl->errorMessage]]);
         } else {
             $response = $curl->response;
-
             $this->setOutputCode(self::SUCCESS_STATUS_CODE);
             $this->setOutputData($this->parseData($response));
         }
