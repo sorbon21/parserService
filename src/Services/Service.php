@@ -57,20 +57,28 @@ abstract class Service
         sleep(rand(self::SLEEP_SECOND_MIN, self::SLEEP_SECOND_MAX));
     }
 
-    public function runJob(Source $source)
+    /**
+     *
+     * @param Source[] $sources
+     */
+    public function runJob(array $sources)
     {
         for ($i = 0; $i < self::MAX_ATTEMPT_COUNT; $i++) {
             echo 'ATTEMPT ' . ($i + 1) . PHP_EOL;
-            $source->run();
-            if ($source->getOutputCode() === $source::SUCCESS_STATUS_CODE) {
-                $this->setOutputCode(self::SUCCESS_STATUS_CODE);
-                $this->setOutputData($source->getOutputData());
-                break;
-            } else {
-                $this->setOutputCode(self::ERROR_STATUS_CODE);
-                $this->setOutputData($source->getOutputData());
+            foreach ($sources as $source) {
+                if ($source instanceof Source) {
+                    $source->run();
+                    if ($source->getOutputCode() === $source::SUCCESS_STATUS_CODE) {
+                        $this->setOutputCode(self::SUCCESS_STATUS_CODE);
+                        $this->setOutputData($source->getOutputData());
+                        break 2;
+                    } else {
+                        $this->setOutputCode(self::ERROR_STATUS_CODE);
+                        $this->setOutputData($source->getOutputData());
+                    }
+                    $this->wait();
+                }
             }
-            $this->wait();
         }
     }
 

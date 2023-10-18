@@ -10,6 +10,7 @@ class VinInfo extends Service
     {
         $source = new EasyGostDotRu();
         $source->setInputData($this->getInputData());
-        $this->runJob($source);
+        $sources[] = $source;
+        $this->runJob($sources);
     }
 }
