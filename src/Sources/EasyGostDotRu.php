@@ -19,8 +19,7 @@ class EasyGostDotRu extends Source
 
     public function createRequest()
     {
-        $http = new HttpRequest();
-        $curl = $http->getClient();
+        $curl = $this->httpRequest;
         $curl->setHeader('Accept', '*/*');
         $curl->setHeader('Accept-Language', 'ru,en-US;q=0.9,en;q=0.8');
         $curl->setHeader('Connection', 'keep-alive');
@@ -54,25 +53,35 @@ class EasyGostDotRu extends Source
 
         $result = [];
         $crawler->filter('.div-revocamp')->each(function (Crawler $node) use (&$result) {
-            $text = $node->text();
             $keys = [
-                "VIN",
-                "Дата",
-                "Место",
-                "Дата начала отзывной кампании",
-                "Организатор отзывной кампании",
-                "Марка",
-                "Коммерческое название ТС",
-                "Причины отзыва"
+                "VIN" => 'vin',
+                "Дата" => 'date',
+                "Место" => 'company',
+                "Работы" => 'work',
+                "Организатор отзывной кампании" => 'organizer_of_the_recall_campaign',
+                "Марка" => 'make',
+                "Дата начала отзывной кампании" => 'date_bigin_the_recall_campaign',
+                "Коммерческое название ТС" => 'commercial_name_ts',
+                "Причины отзыва" => 'reason'
             ];
+            $text = $node->text();
+
             $results = [];
-            foreach ($keys as $key) {
-                $pattern = "/$key:\s*(.*?)(?=\s*$|" . implode('|', array_map('preg_quote', $keys)) . ")/us";
+            $key_names = array_keys($keys);
+
+            foreach ($key_names as $key) {
+                $pattern = "/$key:\s*(.*?)(?=\s*$|" . implode('|', array_map('preg_quote', $key_names)) . ")/us";
                 preg_match($pattern, $text, $matches);
                 if (!empty($matches[1])) {
-                    $results[$key] = trim($matches[1]);
+                    $results[$keys[$key]] = trim($matches[1]);
                 } else {
-                    $results[$key] = null;
+                    if ($key == "VIN") {
+                        $results[$keys[$key]] = $this->getInputData()['vin'];
+
+                    } else {
+                        $results[$keys[$key]] = null;
+                    }
+
                 }
             }
             $result[] = $results;

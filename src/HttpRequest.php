@@ -7,18 +7,51 @@ use Curl\Curl;
 class HttpRequest
 {
     private $client;
+    private static $instance;
 
-    public function __construct()
+    private function __construct()
     {
         $this->client = new Curl();
         $this->client->setHeader('User-Agent', $this->generateUserAgent());
         $this->client->setHeader('sec-ch-ua', $this->generateUniqueSecChUa());
     }
 
+    public static function getInstance()
+    {
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
     public function getClient()
     {
-        srand(time());
         return $this->client;
+    }
+
+    public function setProxy($proxyServer, $proxyPort)
+    {
+        $this->client->setProxy($proxyServer, $proxyPort);
+    }
+
+    public function setProxyAuth($auth)
+    {
+        $this->client->setProxyAuth($auth);
+    }
+
+    public function setProxyType($type)
+    {
+        $this->client->setProxyType($type);
+    }
+
+    public function setProxyTunnel($tunnel = true)
+    {
+        $this->client->setProxyTunnel($tunnel);
+    }
+
+    public function __destruct()
+    {
+        $this->client->close();
     }
 
     private function generateUserAgent()
@@ -66,9 +99,5 @@ class HttpRequest
         return $browsers[array_rand($browsers)];
     }
 
-    public function __destruct()
-    {
-        $this->client->close();
-    }
 
 }

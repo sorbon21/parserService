@@ -2,13 +2,21 @@
 
 namespace App\Sources;
 
+use App\HttpRequest;
+
 abstract class Source
 {
     private $inputData;
     private $outputData;
     private $outputCode;
+    protected $httpRequest;
     const SUCCESS_STATUS_CODE = 1;
     const ERROR_STATUS_CODE = 0;
+
+    public function __construct()
+    {
+        $this->httpRequest = HttpRequest::getInstance()->getClient();
+    }
 
     abstract public function run();
 
